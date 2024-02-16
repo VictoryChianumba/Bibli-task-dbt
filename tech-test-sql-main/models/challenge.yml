@@ -1,0 +1,129 @@
+# You are not required to make any changes to this file, but feel free
+# to inspect!
+
+version: 2
+
+# This source describes tables under the public_raw schema,
+# created from seed data when running `dbt seed` 
+sources:
+  - name: challenge
+    database: postgres
+    schema: public_raw
+    loader: dbt_seed
+    description: "These are the raw data sources to start your challenge."
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+
+    tables:
+      - name: books
+        description: "information relating to books, including their unique \
+                      id (`isbn`), title, and publisher."
+        columns:
+          - name: isbn
+            tests:
+              - unique
+              - not_null
+          - name: title
+            description: The title of this book
+          - name: publisher
+            description: The publisher of this book
+
+      - name: logs
+        description: "access logs of different events being tracked in an app. \
+                      Each event includes a URL, duration (in seconds), and  \
+                      user ID."
+        columns:
+          - name: event_id
+            description: Primary key of the table
+            tests:
+              - unique
+              - not_null
+          - name: event_at
+            description: Timestamp for this event
+            tests:
+              - not_null
+          - name: event_duration_seconds
+            description: Amount of time spent on this event / URL
+          - name: event_url
+            description: "URL corresponding to this event, which includes the path \
+                          within a given title."
+          - name: event_action
+            description: "The action corresponding to this event"
+          - name: visit_id
+            description: "Unique id for this visit, or session, comprised of \
+                          one or more events."
+          - name: user_id
+            description: User who performed this event
+            tests:
+              - not_null
+              - relationships:
+                  to: ref('users')
+                  field: user_id
+                  severity: warn
+
+      - name: users
+        description: "data relating to the users of a platform, including \
+                      their ID, email, account status, and associated \
+                      institution / university"
+        columns:
+          - name: user_id
+            description: Primary key of the table
+            tests:
+              - not_null
+              - unique
+          - name: institution_id
+            description: Institution that this user belongs to
+          - name: status
+            description: The current status of this user
+          - name: signup_at
+            description: The timestamp when this user signed up to the product
+
+# These are the models you will be building for this challenge
+models:
+  - name: 1_institution_metrics
+    columns:
+      - name: institution_id
+        tests:
+          - unique
+          - not_null
+      - name: active_user_count
+      - name: deleted_user_count
+      - name: pending_user_count
+      - name: total_user_count
+  - name: 2_logs_by_title
+    columns:
+      - name: isbn
+        tests:
+          - not_null
+      - name: title
+      - name: event_url
+      - name: duration_seconds
+  - name: 3_book_usage
+    columns:
+      - name: isbn
+        tests:
+          - unique
+          - not_null
+      - name: title
+      - name: total_duration_seconds
+      - name: total_chapters_accessed
+      - name: total_pages_accessed
+  - name: 4_dim_users
+    columns:
+      - name: user_id
+        tests: 
+          - unique
+          - not_null
+      - name: avg_visit_events
+      - name: avg_visit_duration
+      - name: avg_visit_books_accessed
+  - name: 5_retention
+    columns:
+      - name: days_since_signup
+        tests: 
+          - not_null
+
+
+

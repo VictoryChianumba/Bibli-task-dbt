@@ -1,0 +1,65 @@
+
+# This is the name of this dbt project, referenced below in defining seeds and models
+name: 'bibliu_challenge'
+version: '1.0'
+
+# Without this configuration, dbt will assume your dbt_project.yml uses the version 1 syntax, 
+# which was deprecated in dbt v0.19.0.
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project. Profiles contain
+# database connection information, and should be configured in the  ~/.dbt/profiles.yml file
+profile: 'default'
+
+# These configurations specify where dbt should look for different types of files.
+# The `source-paths` config, for example, states that source models can be found
+# in the "models/" directory. You probably won't need to change these!
+model-paths: ["models"]
+analysis-paths: ["analysis"] 
+test-paths: ["tests"]
+seed-paths: ["data"]
+macro-paths: ["macros"]
+
+target-path: "target"  # directory which will store compiled SQL files
+clean-targets:         # directories to be removed by `dbt clean`
+    - "target"
+    - "dbt_modules"
+
+# This describes the schema for seed data to be loaded from CSVs in the /data path
+# This configures data/books.csv, logs.csv, and users.csv
+seeds:
+  bibliu_challenge:
+    enabled: true
+    schema: raw
+    books:
+      # Override column types
+      column_types:
+        isbn: varchar(13)
+        title: varchar(255)
+        publisher: varchar(255)
+    # This configures data/logs.csv
+    logs:
+      # Override column types
+      column_types:
+        event_id: integer
+        event_at: timestamp
+        event_duration_seconds: integer
+        event_url: varchar(255)
+        visit_id: integer
+        user_id: integer
+    users:
+      # Override column types
+      column_types:
+        user_id: integer
+        institution_name: varchar(255)
+        status: varchar(255)
+        signup_at: timestamp
+
+# In this example config, we tell dbt to build all models in the example/ directory
+# as views (the default). These settings can be overridden in the individual model files
+# using the `{{ config(...) }}` macro.
+models:
+  bibliu_challenge:
+    # Applies to all files under models/example/
+    sources:
+      materialized: table

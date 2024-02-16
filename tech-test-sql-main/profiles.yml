@@ -1,0 +1,12 @@
+default:
+  target: local
+  outputs:
+    local:
+      type: postgres
+      host: localhost
+      user: postgres
+      pass: docker
+      port: 5432
+      dbname: postgres
+      schema: public
+      threads: 1
